@@ -1,0 +1,10 @@
+on: [push, pull_request]
+
+jobs:
+    demo:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v2
+            -   uses: ./
+                with:
+                    application-name: webfactory_baton_test_repo

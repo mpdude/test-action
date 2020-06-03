@@ -1,0 +1,11 @@
+
+deployment_group_config:
+    'test-.*':
+        serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
+        ec2TagFilters:
+            - { Type: KEY_AND_VALUE, Key: Name, Value: CodeDeployDemo }
+
+    master:
+        serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
+        ec2TagFilters:
+            - { Type: KEY_AND_VALUE, Key: Name, Value: CodeDeployDemo }
