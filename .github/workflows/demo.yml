@@ -17,7 +17,7 @@ jobs:
             -   id: deploy
                 uses: ./
                 with:
-                    application-name: webfactory_baton_test_repo
+                    application: webfactory_baton_test_repo
             -   uses: peter-evans/commit-comment@v1
                 with:
                     token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,9 +1,12 @@
 name: 'webfactory/create-aws-codedeploy-deployment'
 description: 'Really useful'
 inputs:
-    application-name:
+    application:
         description: 'AWS CodeDeploy application name'
         required: true
+outputs:
+    deploymentId:
+        description: AWS CodeDeployment Deployment-ID of the deployment created
 runs:
     using: 'node12'
     main: 'dist/index.js'

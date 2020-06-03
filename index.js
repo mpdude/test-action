@@ -26,7 +26,7 @@ function fetchDeploymentGroupConfig(branchName) {
 (async function () {
     var deploymentId;
 
-    const applicationName = core.getInput('application-name');
+    const applicationName = core.getInput('application');
     // const region = core.getInput('aws-region');
 
     const repositoryName = payload.repository.full_name;
@@ -92,7 +92,7 @@ function fetchDeploymentGroupConfig(branchName) {
                 }
             }).promise();
             console.log(`🚚️ Created deployment ${deploymentId} – https://console.aws.amazon.com/codesuite/codedeploy/deployments/${deploymentId}`);
-            core.setOutput("deploymentId", deploymentId);
+            core.setOutput('deploymentId', deploymentId);
             break;
         } catch (e) {
             if (e.code == 'DeploymentLimitExceededException') {
