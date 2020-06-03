@@ -67,7 +67,14 @@ function fetchDeploymentGroupConfig(branchName) {
         }
     }
 
-    for (let tries = 0; tries < 5; tries++) {
+    let tries = 0;
+    while (true) {
+
+        if (++tries > 5) {
+            core.setFailed('🤥 Unable to create a deployment, possibly due too much concurrency');
+            return;
+        }
+
         try {
             var {deploymentId: deploymentId} = await codeDeploy.createDeployment({
                 applicationName: applicationName,
@@ -84,21 +91,23 @@ function fetchDeploymentGroupConfig(branchName) {
                     }
                 }
             }).promise();
-            console.log(`🚚️ Created deployment ${deploymentId} – https://${region}.console.aws.amazon.com/codesuite/codedeploy/deployments/${deploymentId}`);
+            console.log(`🚚️ Created deployment ${deploymentId} – https://console.aws.amazon.com/codesuite/codedeploy/deployments/${deploymentId}`);
             core.setOutput("deploymentId", deploymentId);
             break;
         } catch (e) {
             if (e.code == 'DeploymentLimitExceededException') {
                 var [, otherDeployment] = e.message.toString().match(/is already deploying deployment \'(d-\w+)\'/);
                 console.log(`😶 Waiting for another pending deployment ${otherDeployment}`);
+                try {
+                    await codeDeploy.waitFor('deploymentSuccessful', {deploymentId: otherDeployment}).promise();
+                    console.log(`🙂 The pending deployment ${otherDeployment} sucessfully finished.`);
+                } catch (e) {
+                    console.log(`🤔 The other pending deployment ${otherDeployment} seems to have failed.`);
+                }
+                continue;
+            } else {
+                throw e;
             }
-            try {
-                await codeDeploy.waitFor('deploymentSuccessful', {deploymentId: otherDeployment}).promise();
-                console.log(`🙂 The pending deployment ${otherDeployment} sucessfully finished.`);
-            } catch (e) {
-                console.log(`🤔 The other pending deployment ${otherDeployment} seems to have failed.`);
-            }
-            continue;
         }
     }
 
