@@ -1,8 +1,6 @@
 name: 'webfactory/create-aws-codedeploy-deployment'
 description: 'Really useful'
 inputs:
-    aws-region:
-        default: eu-central-1
     application-name:
         description: 'AWS CodeDeploy application name'
         required: true

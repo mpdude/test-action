@@ -3,9 +3,9 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const github = require('@actions/github');
+const payload = github.context.payload;
 
-const payload = JSON.stringify(github.context.payload, undefined, 2);
-console.log(`The event payload: ${payload}`);
+// console.log(payload);
 
 function fetchDeploymentGroupConfig(branchName) {
     let fileContents = fs.readFileSync('./appspec.yml', 'utf8');
@@ -27,18 +27,21 @@ function fetchDeploymentGroupConfig(branchName) {
     var deploymentId;
 
     const applicationName = core.getInput('application-name');
-    const region = core.getInput('aws-region');
+    // const region = core.getInput('aws-region');
 
-    const branchName = 'test-branch'; // aus Kontext
-    const repositoryName = 'webfactory/baton-test-repo'; // aus Kontext
-    const commitId = '38997b7bb0bd3eb2ace0a8c614a76c14b8b3f0dd'; // aus Kontext
+    const repositoryName = payload.repository.full_name;
+    const commitId = payload.head_commit.id;
 
-    const deploymentGroupName = branchName; // ableiten
+    const branchName = payload.ref.replace(/^refs\/heads\//, '');
+    console.log(`On branch '${branchName}'`);
+
+    const deploymentGroupName = branchName.replace(/[^a-z0-9-/]+/gi, '-').replace(/\/+/, '--');
+    console.log(`Using '${deploymentGroupName}' as deployment group name`);
+
+    const deploymentGroupConfig = fetchDeploymentGroupConfig(branchName);
 
     const client = require('aws-sdk/clients/codedeploy');
-    const codeDeploy = new client({region: region});
-
-    const deploymentGroupConfig = fetchDeploymentGroupConfig('test-branch');
+    const codeDeploy = new client();
 
     try {
         await codeDeploy.updateDeploymentGroup({
@@ -51,13 +54,13 @@ function fetchDeploymentGroupConfig(branchName) {
         console.log(`⚙️  Updated deployment group ${deploymentGroupName}`);
     } catch (e) {
         if (e.code == 'DeploymentGroupDoesNotExistException') {
-            await codeDeploy.createDeploymentGroup(
+            await codeDeploy.createDeploymentGroup({
                 ...deploymentGroupConfig,
                 ...{
                     applicationName: applicationName,
                     deploymentGroupName: deploymentGroupName,
                 }
-            ).promise();
+            }).promise();
             console.log(`🎯 Created a new deployment group ${deploymentGroupName}`);
         } else {
             throw e;
