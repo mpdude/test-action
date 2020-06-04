@@ -135,6 +135,10 @@ branch_config:
             serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
             ec2TagFilters:
                 - { Type: KEY_AND_VALUE, Key: Name, Value: CodeDeployDemo }
+        deploymentConfig:
+            autoRollbackConfiguration:
+                enabled: true
+                events: ['DEPLOYMENT_FAILURE', 'DEPLOYMENT_STOP_ON_ALARM', 'DEPLOYMENT_STOP_ON_REQUEST']
 
     '(?!dependabot\/).*':
         deploymentGroupName: test-$BRANCH.test.webfactory.de
@@ -142,3 +146,7 @@ branch_config:
             serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
             ec2TagFilters:
                 - { Type: KEY_AND_VALUE, Key: Name, Value: CodeDeployDemo }
+        deploymentConfig:
+            autoRollbackConfiguration:
+                enabled: true
+                events: ['DEPLOYMENT_FAILURE', 'DEPLOYMENT_STOP_ON_ALARM', 'DEPLOYMENT_STOP_ON_REQUEST']

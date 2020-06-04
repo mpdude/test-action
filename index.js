@@ -12,12 +12,12 @@ function fetchBranchConfig(branchName) {
     for (var prop in data.branch_config) {
         var regex = new RegExp('^' + prop + '$', 'i');
         if (branchName.match(regex)) {
-            console.log(`💡 Using branch_config '${prop}' for branch '${branchName}'`);
+            console.log(`💡 Using appspec.yml -> branch_config '${prop}' for branch '${branchName}'`);
             return data.branch_config[prop];
         }
     }
 
-    console.log(`❓ Found no matching branch_config for '${branchName}' – skipping deployment`);
+    console.log(`❓ Found no matching appspec.yml -> branch_config for '${branchName}' – skipping deployment`);
     process.exit();
 }
 
@@ -30,14 +30,15 @@ function fetchBranchConfig(branchName) {
     const isPullRequest = payload.pull_request !== undefined;
     const commitId = isPullRequest ? payload.pull_request.head.sha : payload.head_commit.id;
     const branchName = isPullRequest ? payload.pull_request.head.ref : payload.ref.replace(/^refs\/heads\//, '');
-    console.log(`On branch '${branchName}', head commit ${commitId}`);
+    console.log(`🎋 On branch '${branchName}', head commit ${commitId}`);
 
     const branchConfig = fetchBranchConfig(branchName);
     const safeBranchName = branchName.replace(/[^a-z0-9-/]+/gi, '-').replace(/\/+/, '--');
     const deploymentGroupName = branchConfig.deploymentGroupName ? branchConfig.deploymentGroupName.replace('$BRANCH', safeBranchName) : safeBranchName;
     const deploymentGroupConfig = branchConfig.deploymentGroupConfig;
+    const deploymentConfig = branchConfig.deploymentConfig;
 
-    console.log(`Using '${deploymentGroupName}' as deployment group name`);
+    console.log(`🎳 Using deployment group '${deploymentGroupName}'`);
 
     const client = require('aws-sdk/clients/codedeploy');
     const codeDeploy = new client();
@@ -50,7 +51,7 @@ function fetchBranchConfig(branchName) {
                 currentDeploymentGroupName: deploymentGroupName
             }
         }).promise();
-        console.log(`⚙️  Updated deployment group ${deploymentGroupName}`);
+        console.log(`⚙️ Updated deployment group '${deploymentGroupName}'`);
     } catch (e) {
         if (e.code == 'DeploymentGroupDoesNotExistException') {
             await codeDeploy.createDeploymentGroup({
@@ -60,7 +61,7 @@ function fetchBranchConfig(branchName) {
                     deploymentGroupName: deploymentGroupName,
                 }
             }).promise();
-            console.log(`🎯 Created a new deployment group ${deploymentGroupName}`);
+            console.log(`🎯 Created deployment group '${deploymentGroupName}'`);
         } else {
             throw e;
         }
@@ -70,23 +71,22 @@ function fetchBranchConfig(branchName) {
     while (true) {
 
         if (++tries > 5) {
-            core.setFailed('🤥 Unable to create a deployment, possibly due too much concurrency');
+            core.setFailed('🤥 Unable to create a new deployment (too much concurrency?)');
             return;
         }
 
         try {
             var {deploymentId: deploymentId} = await codeDeploy.createDeployment({
-                applicationName: applicationName,
-                autoRollbackConfiguration: {
-                    enabled: true,
-                    events: ['DEPLOYMENT_FAILURE', 'DEPLOYMENT_STOP_ON_ALARM', 'DEPLOYMENT_STOP_ON_REQUEST'],
-                },
-                deploymentGroupName: deploymentGroupName,
-                revision: {
-                    revisionType: 'GitHub',
-                    gitHubLocation: {
-                        commitId: commitId,
-                        repository: fullRepositoryName
+                ...deploymentConfig,
+                ...{
+                    applicationName: applicationName,
+                    deploymentGroupName: deploymentGroupName,
+                    revision: {
+                        revisionType: 'GitHub',
+                        gitHubLocation: {
+                            commitId: commitId,
+                            repository: fullRepositoryName
+                        }
                     }
                 }
             }).promise();
