@@ -17,7 +17,7 @@ function fetchBranchConfig(branchName) {
         }
     }
 
-    core.setFailed('❓ Found no matching deployment_group_config – aborting');
+    console.log(`❓ Found no matching branch_config for '${branchName}' – skipping deployment`);
     process.exit();
 }
 

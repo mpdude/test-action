@@ -129,15 +129,15 @@ hooks:
 
 
 branch_config:
-    'test-.*':
-        deploymentGroupName: test-$BRANCH.test.webfactory.de
+    master:
+        deploymentGroupName: www.this-is-master.de
         deploymentGroupConfig:
             serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
             ec2TagFilters:
                 - { Type: KEY_AND_VALUE, Key: Name, Value: CodeDeployDemo }
 
-    master:
-        deploymentGroupName: www.this-is-master.de
+    '(?!dependabot\/).*':
+        deploymentGroupName: test-$BRANCH.test.webfactory.de
         deploymentGroupConfig:
             serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
             ec2TagFilters:
