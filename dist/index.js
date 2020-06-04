@@ -1718,7 +1718,7 @@ function fetchBranchConfig(branchName) {
                     }
                 }
             }).promise();
-            console.log(`🚚️ Created deployment ${deploymentId} – https://console.aws.amazon.com/codesuite/codedeploy/deployments/${deploymentId}`);
+            console.log(`🚚️ Created deployment ${deploymentId} – https://console.aws.amazon.com/codesuite/codedeploy/deployments/${deploymentId}?region=${codeDeploy.config.region}`);
             core.setOutput('deploymentId', deploymentId);
             break;
         } catch (e) {
