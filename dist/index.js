@@ -1654,15 +1654,13 @@ function fetchDeploymentGroupConfig(branchName) {
 (async function () {
     var deploymentId;
 
-    const applicationName = core.getInput('application');
-    // const region = core.getInput('aws-region');
-
-    const repositoryName = payload.repository.full_name;
+    const applicationName = core.getInput('application') || payload.repository.name;
+    const fullRepositoryName = payload.repository.full_name;
 
     const commitId = payload.head_commit.id;
     const isPullRequest = payload.pull_request !== undefined;
     const branchName = isPullRequest ? payload.pull_request.head.ref : payload.ref.replace(/^refs\/heads\//, '');
-    console.log(`On branch '${branchName}'`);
+    console.log(`On branch '${branchName}', head commit ${commitId}`);
 
     const deploymentGroupName = branchName.replace(/[^a-z0-9-/]+/gi, '-').replace(/\/+/, '--');
     console.log(`Using '${deploymentGroupName}' as deployment group name`);
@@ -1716,7 +1714,7 @@ function fetchDeploymentGroupConfig(branchName) {
                     revisionType: 'GitHub',
                     gitHubLocation: {
                         commitId: commitId,
-                        repository: repositoryName
+                        repository: fullRepositoryName
                     }
                 }
             }).promise();
