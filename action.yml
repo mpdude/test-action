@@ -6,6 +6,8 @@ inputs:
 outputs:
     deploymentId:
         description: AWS CodeDeployment Deployment-ID of the deployment created
+    deploymentGroupName:
+        description: AWS CodeDeployment Deployment Group name used
 runs:
     using: 'node12'
     main: 'dist/index.js'

@@ -1720,6 +1720,7 @@ function fetchBranchConfig(branchName) {
             }).promise();
             console.log(`🚚️ Created deployment ${deploymentId} – https://console.aws.amazon.com/codesuite/codedeploy/deployments/${deploymentId}?region=${codeDeploy.config.region}`);
             core.setOutput('deploymentId', deploymentId);
+            core.setOutput('deploymentGroupName', deploymentGroupName);
             break;
         } catch (e) {
             if (e.code == 'DeploymentLimitExceededException') {
