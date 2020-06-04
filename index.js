@@ -5,17 +5,15 @@ const yaml = require('js-yaml');
 const github = require('@actions/github');
 const payload = github.context.payload;
 
-// console.log(payload);
-
-function fetchDeploymentGroupConfig(branchName) {
+function fetchBranchConfig(branchName) {
     let fileContents = fs.readFileSync('./appspec.yml', 'utf8');
     let data = yaml.safeLoad(fileContents);
 
-    for (var prop in data.deployment_group_config) {
+    for (var prop in data.branch_config) {
         var regex = new RegExp('^' + prop + '$', 'i');
         if (branchName.match(regex)) {
-            console.log(`💡 Using deployment_group_config key '${prop}' for branch '${branchName}'`);
-            return data.deployment_group_config[prop];
+            console.log(`💡 Using branch_config '${prop}' for branch '${branchName}'`);
+            return data.branch_config[prop];
         }
     }
 
@@ -29,15 +27,17 @@ function fetchDeploymentGroupConfig(branchName) {
     const applicationName = core.getInput('application') || payload.repository.name;
     const fullRepositoryName = payload.repository.full_name;
 
-    const commitId = payload.head_commit.id;
     const isPullRequest = payload.pull_request !== undefined;
+    const commitId = isPullRequest ? payload.pull_request.head.sha : payload.head_commit.id;
     const branchName = isPullRequest ? payload.pull_request.head.ref : payload.ref.replace(/^refs\/heads\//, '');
     console.log(`On branch '${branchName}', head commit ${commitId}`);
 
-    const deploymentGroupName = branchName.replace(/[^a-z0-9-/]+/gi, '-').replace(/\/+/, '--');
-    console.log(`Using '${deploymentGroupName}' as deployment group name`);
+    const branchConfig = fetchBranchConfig(branchName);
+    const safeBranchName = branchName.replace(/[^a-z0-9-/]+/gi, '-').replace(/\/+/, '--');
+    const deploymentGroupName = branchConfig.deploymentGroupName ? branchConfig.deploymentGroupName.replace('$BRANCH', safeBranchName) : safeBranchName;
+    const deploymentGroupConfig = branchConfig.deploymentGroupConfig;
 
-    const deploymentGroupConfig = fetchDeploymentGroupConfig(branchName);
+    console.log(`Using '${deploymentGroupName}' as deployment group name`);
 
     const client = require('aws-sdk/clients/codedeploy');
     const codeDeploy = new client();
