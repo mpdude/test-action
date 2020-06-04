@@ -1658,9 +1658,10 @@ function fetchDeploymentGroupConfig(branchName) {
     // const region = core.getInput('aws-region');
 
     const repositoryName = payload.repository.full_name;
-    const commitId = payload.head_commit.id;
 
-    const branchName = payload.ref.replace(/^refs\/heads\//, '');
+    const commitId = payload.head_commit.id;
+    const isPullRequest = payload.pull_request !== undefined;
+    const branchName = isPullRequest ? payload.pull_request.head.ref : payload.ref.replace(/^refs\/heads\//, '');
     console.log(`On branch '${branchName}'`);
 
     const deploymentGroupName = branchName.replace(/[^a-z0-9-/]+/gi, '-').replace(/\/+/, '--');
