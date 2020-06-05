@@ -17,7 +17,9 @@ function BeforeInstall() {
     cd /var/www
 
     if [ -d $DEPLOYMENT_GROUP_NAME ]; then
-        echo updating deployment TBD
+        echo Release sollte $RELEASE werden, commit $COMMIT_ID
+        cd $DEPLOYMENT_GROUP_NAME
+        REF=$COMMIT_ID depp prepare
     else
         depp setup "$DEPLOYMENT_GROUP_NAME" "$REPO_URL" "$COMMIT_ID"
     fi
