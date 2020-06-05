@@ -56,7 +56,7 @@ os: linux
 #   the "hooks" section altogether. A blank or incomplete "hooks" section
 #   may cause associated deployments to fail.
 
-# hooks:
+hooks:
 # For each deployment lifecycle event, specify multiple "location" entries
 #   if you want to run multiple scripts during that event.
 # You can specify "timeout" as the number of seconds to wait until failing the deployment
@@ -94,8 +94,8 @@ os: linux
 
 # During the AfterInstall deployment lifecycle event, run the commands
 #   in the script specified in "location".
-#  AfterInstall:
-#    - location: deployment.sh
+  AfterInstall:
+    - location: deployment.sh
 #      runas: root
 
 #    - location:
