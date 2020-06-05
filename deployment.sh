@@ -5,9 +5,13 @@ read -r REPO_URL COMMIT_ID <<< $(aws deploy get-deployment --deployment-id=$DEPL
 export REPO_URL COMMIT_ID
 export RELEASE=`date +%Y%m%d%H%M%S`
 
+eval `$SSHAGENT $SSHAGENTARGS`
+trap "kill $SSH_AGENT_PID" 0
+
 cd /var/www
-if [ -d $DEPLOYMENT_GROUP ]; then
+if [ -d $DEPLOYMENT_GROUP_NAME ]; then
     echo updating deployment TBD
 else
-    depp setup "$DEPLOYMENT_GROUP" "$REPO_URL" "$COMMIT_ID"
+    git clone "$REPO_URL" "$DEPLOYMENT_GROUP_NAME"
+    # depp setup "$DEPLOYMENT_GROUP" "$REPO_URL" "$COMMIT_ID"
 fi 
