@@ -139,5 +139,7 @@ branch_config:
                 - { Type: KEY_AND_VALUE, Key: Name, Value: testaroli.ec2.webfactory.de }
         deploymentConfig:
             autoRollbackConfiguration:
-                enabled: true
-                events: ['DEPLOYMENT_FAILURE', 'DEPLOYMENT_STOP_ON_ALARM', 'DEPLOYMENT_STOP_ON_REQUEST']
+                enabled: false
+#            autoRollbackConfiguration:
+#                enabled: true
+#                events: ['DEPLOYMENT_FAILURE', 'DEPLOYMENT_STOP_ON_ALARM', 'DEPLOYMENT_STOP_ON_REQUEST']

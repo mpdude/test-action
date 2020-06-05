@@ -5,17 +5,16 @@ read -r REPO_URL COMMIT_ID <<< $(aws deploy get-deployment --deployment-id=$DEPL
 export REPO_URL COMMIT_ID
 export RELEASE=`date +%Y%m%d%H%M%S`
 
-eval `$SSHAGENT $SSHAGENTARGS`
+eval `ssh-agent -s`
+trap "echo Killing SSH agent with PID $SSH_AGENT_PID; kill $SSH_AGENT_PID" 0
+
 printenv
-
-trap "echo 'Killing SSH agent.'; kill $SSH_AGENT_PID" 0
-
-echo SSH Agent PID $SSH_AGENT_PID
+ssh-add
 
 cd /var/www
 if [ -d $DEPLOYMENT_GROUP_NAME ]; then
     echo updating deployment TBD
 else
-    git clone "$REPO_URL" "$DEPLOYMENT_GROUP_NAME"
+    git clone "git@github.com:webfactory/symfony-webfactory-edition.git" "$DEPLOYMENT_GROUP_NAME"
     # depp setup "$DEPLOYMENT_GROUP" "$REPO_URL" "$COMMIT_ID"
 fi 
