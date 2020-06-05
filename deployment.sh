@@ -6,7 +6,11 @@ export REPO_URL COMMIT_ID
 export RELEASE=`date +%Y%m%d%H%M%S`
 
 eval `$SSHAGENT $SSHAGENTARGS`
-trap "kill $SSH_AGENT_PID" 0
+printenv
+
+trap "echo 'Killing SSH agent.'; kill $SSH_AGENT_PID" 0
+
+echo SSH Agent PID $SSH_AGENT_PID
 
 cd /var/www
 if [ -d $DEPLOYMENT_GROUP_NAME ]; then
