@@ -12,6 +12,10 @@ function fetchBranchConfig(branchName) {
     for (var prop in data.branch_config) {
         var regex = new RegExp('^' + prop + '$', 'i');
         if (branchName.match(regex)) {
+            if (data.branch_config[prop] == null) {
+                console.log(`🤷🏻‍♂️ Found an empty appspec.yml -> branch_config for '${branchName}' – skipping deployment`);
+                process.exit();
+            }
             console.log(`💡 Using appspec.yml -> branch_config '${prop}' for branch '${branchName}'`);
             return data.branch_config[prop];
         }
