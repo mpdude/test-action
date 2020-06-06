@@ -52,6 +52,7 @@ function fetchBranchConfig(branchName) {
             }
         }).promise();
         console.log(`⚙️ Updated deployment group '${deploymentGroupName}'`);
+        core.setOutput('deploymentGroupCreated', false);
     } catch (e) {
         if (e.code == 'DeploymentGroupDoesNotExistException') {
             await codeDeploy.createDeploymentGroup({
@@ -62,6 +63,7 @@ function fetchBranchConfig(branchName) {
                 }
             }).promise();
             console.log(`🎯 Created deployment group '${deploymentGroupName}'`);
+            core.setOutput('deploymentGroupCreated', true);
         } else {
             throw e;
         }
