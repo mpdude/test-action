@@ -7,8 +7,9 @@ function BeforeInstall() {
     read -r REPO_URL COMMIT_ID <<< $(aws deploy get-deployment --deployment-id=$DEPLOYMENT_ID | jq -r '"git@github.com:\(.deploymentInfo.revision.gitHubLocation.repository).git " + .deploymentInfo.revision.gitHubLocation.commitId')
     export REPO_URL COMMIT_ID
 
-    export RELEASE=`date +%Y%m%d%H%M%S`
-    echo $RELEASE > $DEPLOYMENT_DIR/depp-release-version
+    # export RELEASE=`date +%Y%m%d%H%M%S`
+    export RELEASE=$DEPLOYMENT_ID
+    #echo $RELEASE > $DEPLOYMENT_DIR/depp-release-version
 
     eval `ssh-agent -s`
     trap "echo Killing SSH agent with PID $SSH_AGENT_PID; kill $SSH_AGENT_PID" 0
@@ -28,8 +29,9 @@ function BeforeInstall() {
 
 function ApplicationStart() {
     cd /var/www/$DEPLOYMENT_GROUP_NAME
-    [ -L current_version ] && basename $(readlink -f current_version) > $DEPLOYMENT_DIR/depp-previous-release
-    depp deploy $(cat $DEPLOYMENT_DIR/depp-release-version)
+    # [ -L current_version ] && basename $(readlink -f current_version) > $DEPLOYMENT_DIR/depp-previous-release
+    #depp deploy $(cat $DEPLOYMENT_DIR/depp-release-version)
+    depp deploy $DEPLOYMENT_ID
 }
 
 function ValidateService() {
