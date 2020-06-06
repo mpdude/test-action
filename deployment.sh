@@ -29,9 +29,14 @@ function BeforeInstall() {
 
 function ApplicationStop() {
     STOPPING_DEPLOYMENT_ID=$(basename $(readlink -f $DEPLOYMENT_DIR))
-    cd /var/www/$DEPLOYMENT_GROUP_NAME/$STOPPING_DEPLOYMENT_ID
-    [ -f meta/wfdynamic.xml ] && phlough wfdynamic:configuration-dump
-    git diff-index --quiet HEAD -- || (echo Es gibt untracked files und/oder uncommitted changes in `pwd`. Breche ab.; exit 1)
+    OLD_DEPLOYMENT_DIR=/var/www/$DEPLOYMENT_GROUP_NAME/$STOPPING_DEPLOYMENT_ID
+    if [ -d $OLD_DEPLOYMENT_DIR ]; then
+        cd $OLD_DEPLOYMENT_DIR
+        [ -f meta/wfdynamic.xml ] && echo "Dumpe aktuelle wfDynamic-Konfiguration" && phlough wfdynamic:configuration-dump
+        git diff-index --quiet HEAD -- || (echo Es gibt untracked files und/oder uncommitted changes in `pwd`. Breche ab.; exit 1)
+    else
+        echo "Das alte Deployment-Verzeichnis $OLD_DEPLOYMENT_DIR existiert nicht mehr; führe keine weiteren Tests aus."
+    fi
 }
 
 function ApplicationStart() {
