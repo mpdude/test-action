@@ -27,6 +27,12 @@ function BeforeInstall() {
 
 }
 
+function ApplicationStop() {
+    cd /var/www/$DEPLOYMENT_GROUP_NAME/$DEPLOYMENT_ID
+    [ -f meta/wfdynamic.xml ] && phlough wfdynamic:configuration-dump
+    git diff-index --quiet HEAD -- || (echo Es gibt untracked files und/oder uncommitted changes in `pwd`. Breche ab.; exit 1)
+}
+
 function ApplicationStart() {
     cd /var/www/$DEPLOYMENT_GROUP_NAME
     # [ -L current_version ] && basename $(readlink -f current_version) > $DEPLOYMENT_DIR/depp-previous-release
@@ -39,6 +45,10 @@ function ValidateService() {
 }
 
 case $LIFECYCLE_EVENT in
+
+    ApplicationStop)
+        ApplicationStop
+    ;;
 
     BeforeInstall)
         BeforeInstall

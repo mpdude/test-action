@@ -8,11 +8,9 @@
 version: 0.0
 os: linux
 
-files:
-  - source: /www/index.html
-    destination: /tmp/test-codedeploy.html
-    
 hooks:
+  ApplicationStop:
+    - location: deployment.sh
   BeforeInstall:
     - location: deployment.sh
   AfterInstall:
