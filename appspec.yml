@@ -129,18 +129,12 @@ hooks:
 
 
 branch_config:
-    master:
-        deploymentGroupName: www.this-is-master.de
-        deploymentGroupConfig:
-            serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
-            ec2TagFilters:
-                - { Type: KEY_AND_VALUE, Key: Name, Value: CodeDeployDemo }
-        deploymentConfig:
-            autoRollbackConfiguration:
-                enabled: true
-                events: ['DEPLOYMENT_FAILURE', 'DEPLOYMENT_STOP_ON_ALARM', 'DEPLOYMENT_STOP_ON_REQUEST']
+    master: ~
+    dependabot\/.*: ~
 
-    '(?!dependabot\/).*':
+    mpdude-patch-1: ~ 
+    
+    '.*':
         deploymentGroupName: test-$BRANCH.test.webfactory.de
         deploymentGroupConfig:
             serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
