@@ -22,6 +22,7 @@ hooks:
 
 branch_config:
     master: ~
+
     dependabot\/.*: ~
 
     '.*':
@@ -33,6 +34,3 @@ branch_config:
         deploymentConfig:
             autoRollbackConfiguration:
                 enabled: false
-#            autoRollbackConfiguration:
-#                enabled: true
-#                events: ['DEPLOYMENT_FAILURE', 'DEPLOYMENT_STOP_ON_ALARM', 'DEPLOYMENT_STOP_ON_REQUEST']
