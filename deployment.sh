@@ -28,10 +28,10 @@ function BeforeInstall() {
 }
 
 function ApplicationStop() {
-    echo ALTES DEPLOYMENT – $(readlink -f $0)
-#    cd /var/www/$DEPLOYMENT_GROUP_NAME/$DEPLOYMENT_ID
-#    [ -f meta/wfdynamic.xml ] && phlough wfdynamic:configuration-dump
-#    git diff-index --quiet HEAD -- || (echo Es gibt untracked files und/oder uncommitted changes in `pwd`. Breche ab.; exit 1)
+    STOPPING_DEPLOYMENT_ID=$(basename $(readlink -f $DEPLOYMENT_DIR))
+    cd /var/www/$DEPLOYMENT_GROUP_NAME/$STOPPING_DEPLOYMENT_ID
+    [ -f meta/wfdynamic.xml ] && phlough wfdynamic:configuration-dump
+    git diff-index --quiet HEAD -- || (echo Es gibt untracked files und/oder uncommitted changes in `pwd`. Breche ab.; exit 1)
 }
 
 function ApplicationStart() {
@@ -48,7 +48,7 @@ function ValidateService() {
 function AfterInstall() {
     cd /var/www/$DEPLOYMENT_GROUP_NAME/$DEPLOYMENT_ID
     [ -x bin/console ] && bin/console list --raw | grep -q doctrine:migrations:migrate && bin/console doctrine:migrations:migrate --allow-no-migration --no-ansi --no-interaction
-    [ -f meta/wfdynamic.xml ] &&
+    [ -f meta/wfdynamic.xml ] && phlough wfdynamic:configuration-import
 }
 
 case $LIFECYCLE_EVENT in
