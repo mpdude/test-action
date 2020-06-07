@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 export DEPLOYMENT_DIR=$(dirname $(readlink -f $0))/..
 
