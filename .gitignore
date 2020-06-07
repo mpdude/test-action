@@ -1,1 +1,6 @@
+tmp
+bin
+conf
+logs
+sessions
 node_modules
