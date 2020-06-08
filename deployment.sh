@@ -45,7 +45,7 @@ function AfterInstall() {
         phlough wfdynamic:configuration-import
     fi
 
-    for EXISTING_DEPLOYMENT in `ls d-?????????`; do
+    for EXISTING_DEPLOYMENT in `ls -d d-?????????`; do
         [ -d $DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT ] || echo "$DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT existiert nicht, also kann $EXISTING_DEPLOYMENT wahrscheinlich weg"
     done
     #for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do F=`echo $TMP | sed 's/tmp\/symfony-//'`; test -d $F || sudo rm -rf $TMP ; done
