@@ -34,11 +34,6 @@ function BeforeInstall() {
     fi
 }
 
-function ApplicationStart() {
-    cd /var/www/$DEPLOYMENT_GROUP_NAME
-    depp deploy $DEPLOYMENT_ID
-}
-
 function AfterInstall() {
     cd /var/www/$DEPLOYMENT_GROUP_NAME/$DEPLOYMENT_ID
     if [ -x bin/console ]; then
@@ -49,6 +44,18 @@ function AfterInstall() {
     if [ -f meta/wfdynamic.xml ]; then
         phlough wfdynamic:configuration-import
     fi
+
+    for EXISTING_DEPLOYMENT in d-?????????; do
+        [ -d $DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT ] && echo "$DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT existiert nicht, also kann $EXISTING_DEPLOYMENT wahrscheinlich weg"
+    done
+    #for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do F=`echo $TMP | sed 's/tmp\/symfony-//'`; test -d $F || sudo rm -rf $TMP ; done
+    for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do F=`echo $TMP | sed 's/tmp\/symfony-//'`; test -d $F || echo $TMP kann wahrscheinlich weg ; done
+}
+
+function ApplicationStart() {
+    cd /var/www/$DEPLOYMENT_GROUP_NAME
+    depp deploy $DEPLOYMENT_ID
+
 }
 
 case $LIFECYCLE_EVENT in
