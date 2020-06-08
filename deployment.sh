@@ -6,7 +6,7 @@ function ApplicationStop() {
     CURRENT_DEPLOYMENT=/var/www/$DEPLOYMENT_GROUP_NAME/current_version
     if [ -d $CURRENT_DEPLOYMENT ]; then
         cd $CURRENT_DEPLOYMENT
-        [ -f meta/wfdynamic.xml ] && echo "Dumpe aktuelle wfDynamic-Konfiguration" && phlough wfdynamic:configuration-dump
+        [ ! -f meta/wfdynamic.xml ] || (echo "Dumpe aktuelle wfDynamic-Konfiguration" && phlough wfdynamic:configuration-dump)
         git diff-index --quiet HEAD -- || (echo Es gibt untracked files und/oder uncommitted changes in `pwd`. Breche ab.; exit 1)
     else
         echo "Es gibt keine laufende Version in $CURRENT_DEPLOYMENT; führe keine weiteren Tests aus."
@@ -46,10 +46,13 @@ function AfterInstall() {
     fi
 
     for EXISTING_DEPLOYMENT in d-?????????; do
-        [ -d $DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT ] && echo "$DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT existiert nicht, also kann $EXISTING_DEPLOYMENT wahrscheinlich weg"
+        [ -d $DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT ] || echo "$DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT existiert nicht, also kann $EXISTING_DEPLOYMENT wahrscheinlich weg"
     done
     #for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do F=`echo $TMP | sed 's/tmp\/symfony-//'`; test -d $F || sudo rm -rf $TMP ; done
-    for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do F=`echo $TMP | sed 's/tmp\/symfony-//'`; test -d $F || echo $TMP kann wahrscheinlich weg ; done
+    for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do
+        F=`echo $TMP | sed 's/tmp\/symfony-//'`
+        test -d $F || echo $TMP kann wahrscheinlich weg
+    done
 }
 
 function ApplicationStart() {
