@@ -7,7 +7,11 @@ function ApplicationStop() {
     if [ -d $CURRENT_DEPLOYMENT ]; then
         cd $CURRENT_DEPLOYMENT
         [ ! -f meta/wfdynamic.xml ] || (echo "Dumpe aktuelle wfDynamic-Konfiguration" && phlough wfdynamic:configuration-dump)
-        git diff-files --exit-code || (echo Es gibt untracked files und/oder uncommitted changes in `pwd`. Breche ab.; exit 1)
+        if git status --porcelain | grep -q -P '^(?!\?\?)'; then
+            git status --porcelain
+            echo Es gibt Änderungen an tracked files in `pwd`. Breche ab.
+            exit 1
+        fi
     else
         echo "Es gibt keine laufende Version in $CURRENT_DEPLOYMENT; führe keine weiteren Tests aus."
     fi
