@@ -55,12 +55,11 @@ function ApplicationStart() {
     depp deploy $DEPLOYMENT_ID
 
     for EXISTING_DEPLOYMENT in `ls -d d-????????? 2>/dev/null`; do
-        [ -d $DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT ] || echo "$DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT existiert nicht, also kann $EXISTING_DEPLOYMENT wahrscheinlich weg"
+        [ -d $DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT ] || (echo "Räume altes Deployment $EXISTING_DEPLOYMENT weg."; sudo rm -rf $EXISTING_DEPLOYMENT)
     done
-    #for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do F=`echo $TMP | sed 's/tmp\/symfony-//'`; test -d $F || sudo rm -rf $TMP ; done
     for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do
         F=`echo $TMP | sed 's/tmp\/symfony-//'`
-        test -d $F || echo $TMP kann wahrscheinlich weg
+        test -d $F || (echo "Räume altes Symfony tmp-Dir $TMP weg."; sudo rm -rf $TMP)
     done
 }
 
