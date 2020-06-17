@@ -31,6 +31,3 @@ branch_config:
             serviceRoleArn: arn:aws:iam::279767678935:role/CodeDeployServiceRole
             ec2TagFilters:
                 - { Type: KEY_AND_VALUE, Key: Name, Value: testaroli.ec2.webfactory.de }
-        deploymentConfig:
-            autoRollbackConfiguration:
-                enabled: false
