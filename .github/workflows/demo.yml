@@ -15,7 +15,7 @@ jobs:
                     aws-region: eu-central-1
             -   uses: actions/checkout@v2
             -   id: deploy
-                uses: ./
+                uses: webfactory/create-aws-codedeploy-deployment@master
                 with:
                     application: webfactory_baton_test_repo
 #            -   uses: peter-evans/commit-comment@v1

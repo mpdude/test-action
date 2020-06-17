@@ -1,8 +1,82 @@
-#!/bin/sh -ex
+#!/bin/bash -e
 
-export AWS_DEFAULT_REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region`
-read -r REPOSITORY_NAME COMMIT_ID <<< $(aws deploy get-deployment --deployment-id=$DEPLOYMENT_ID | jq -r '.deploymentInfo.revision.gitHubLocation.repository + " " + .deploymentInfo.revision.gitHubLocation.commitId')
-export REPOSITORY_NAME COMMIT_ID 
-who am i
-pwd
-printenv
+export DEPLOYMENT_DIR=$(dirname $(readlink -f $0))/..
+
+function ApplicationStop() {
+    CURRENT_DEPLOYMENT=/var/www/$DEPLOYMENT_GROUP_NAME/current_version
+    if [ -d $CURRENT_DEPLOYMENT ]; then
+        cd $CURRENT_DEPLOYMENT
+        [ ! -f meta/wfdynamic.xml ] || (echo "Dumpe aktuelle wfDynamic-Konfiguration" && phlough wfdynamic:configuration-dump)
+        if git status --porcelain | grep -q -P '^(?!\?\?)'; then
+            git status --porcelain
+            echo Es gibt Änderungen an tracked files in `pwd`. Breche ab.
+            exit 1
+        fi
+    else
+        echo "Es gibt keine laufende Version in $CURRENT_DEPLOYMENT; führe keine weiteren Tests aus."
+    fi
+}
+
+function BeforeInstall() {
+    export AWS_DEFAULT_REGION=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region`
+    read -r REPO_URL COMMIT_ID <<< $(aws deploy get-deployment --deployment-id=$DEPLOYMENT_ID | jq -r '"git@github.com:\(.deploymentInfo.revision.gitHubLocation.repository).git " + .deploymentInfo.revision.gitHubLocation.commitId')
+    export REPO_URL COMMIT_ID
+    export RELEASE=$DEPLOYMENT_ID
+
+    eval `ssh-agent -s`
+    trap "echo Killing SSH agent with PID $SSH_AGENT_PID; kill $SSH_AGENT_PID" 0
+    ssh-add
+
+    cd /var/www
+
+    if [ -d $DEPLOYMENT_GROUP_NAME ]; then
+        echo Release sollte $RELEASE werden, commit $COMMIT_ID
+        cd $DEPLOYMENT_GROUP_NAME
+        REF=$COMMIT_ID depp prepare
+    else
+        depp setup "$DEPLOYMENT_GROUP_NAME" "$REPO_URL" "$COMMIT_ID"
+    fi
+}
+
+function AfterInstall() {
+    cd /var/www/$DEPLOYMENT_GROUP_NAME/$DEPLOYMENT_ID
+    if [ -x bin/console ]; then
+        if bin/console list --raw | grep -q doctrine:migrations:migrate; then
+            bin/console doctrine:migrations:migrate --allow-no-migration --no-ansi --no-interaction
+        fi
+    fi
+    if [ -f meta/wfdynamic.xml ]; then
+        phlough wfdynamic:configuration-import
+    fi
+}
+
+function ApplicationStart() {
+    cd /var/www/$DEPLOYMENT_GROUP_NAME
+    depp deploy $DEPLOYMENT_ID
+
+    for EXISTING_DEPLOYMENT in `ls -d d-????????? 2>/dev/null`; do
+        [ -d $DEPLOYMENT_DIR/../$EXISTING_DEPLOYMENT ] || (echo "Räume altes Deployment $EXISTING_DEPLOYMENT weg."; sudo rm -rf $EXISTING_DEPLOYMENT)
+    done
+    for TMP in `ls -d tmp/symfony-* 2>/dev/null`; do
+        F=`echo $TMP | sed 's/tmp\/symfony-//'`
+        test -d $F || (echo "Räume altes Symfony tmp-Dir $TMP weg."; sudo rm -rf $TMP)
+    done
+}
+
+case $LIFECYCLE_EVENT in
+    ApplicationStop)
+        ApplicationStop
+    ;;
+
+    BeforeInstall)
+        BeforeInstall
+    ;;
+
+    AfterInstall)
+        AfterInstall
+    ;;
+
+    ApplicationStart)
+        ApplicationStart
+    ;;
+esac
