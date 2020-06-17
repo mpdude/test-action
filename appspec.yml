@@ -10,15 +10,15 @@ os: linux
 
 hooks:
   ApplicationStop:
-    - location: deployment.sh
+    - location: .aws/codedeploy
   BeforeInstall:
-    - location: deployment.sh
+      - location: .aws/codedeploy
   AfterInstall:
-    - location: deployment.sh
+      - location: .aws/codedeploy
   ApplicationStart:
-    - location: deployment.sh
+      - location: .aws/codedeploy
   ValidateService:
-    - location: deployment.sh
+      - location: .aws/codedeploy
 
 branch_config:
     master: ~
