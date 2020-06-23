@@ -15,9 +15,7 @@ jobs:
                     aws-region: eu-central-1
             -   uses: actions/checkout@v2
             -   id: deploy
-                uses: ./
-                with:
-                    application: webfactory_baton_test_repo
+                uses: webfactory/create-aws-codedeploy-deployment@create-application
 #            -   uses: peter-evans/commit-comment@v1
 #                with:
 #                    token: ${{ secrets.GITHUB_TOKEN }}
